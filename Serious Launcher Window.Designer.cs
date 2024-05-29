@@ -34,6 +34,7 @@
             // 
             // SetupButton
             // 
+            SetupButton.Enabled = false;
             SetupButton.Location = new Point(891, 597);
             SetupButton.Name = "SetupButton";
             SetupButton.Size = new Size(94, 29);
@@ -93,8 +94,10 @@
             Controls.Add(pictureBox1);
             Controls.Add(SetupProgressBar);
             Controls.Add(SetupButton);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Name = "SeriousLauncherWindow";
             Text = "Serious Trouble Launcher";
+            Shown += SeriousLauncherWindow_Shown;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             StatusStrip.ResumeLayout(false);
             StatusStrip.PerformLayout();
