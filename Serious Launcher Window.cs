@@ -42,8 +42,11 @@ namespace SeriousLauncher {
             string trimSequence = Encoding.UTF8.GetString(sequence, 0, sequence.Length - 1);
             string supposedPath = Path.GetFullPath(trimSequence);
             if (Directory.Exists(supposedPath) == false) {
-                StatusStripLabel.Text = string.Format("The path does not exist '{0}'", supposedPath);
-                return false;
+                string root = Path.GetFullPath(Path.Combine(supposedPath, @"..\"));
+                if (Directory.Exists(root) == false) {
+                    StatusStripLabel.Text = string.Format("The path does not exist '{0}'", supposedPath);
+                    return false;
+                }
             }
             // The suggested installation path that is found in the registry
             this.pathToApplication = supposedPath;
@@ -65,11 +68,6 @@ namespace SeriousLauncher {
             string fullPathToArchive = Path.GetFullPath(fileName, @"C:\Users\deeffoora\Downloads");
 
 
-            //string root = Path.GetFullPath(Path.Combine(fullPathToApplication, @"..\"));
-            //if (Directory.Exists(root) == false) {
-            //    StatusStripLabel.Text = string.Format("Root application directory is missing '{0}'", root);
-            //    return;
-            //}
 
             using ZipArchive archive = ZipFile.OpenRead(fullPathToArchive);
             SetupProgressBar.Maximum = archive.Entries.Count;
