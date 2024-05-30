@@ -43,6 +43,7 @@
             this.SetupButton.TabIndex = 0;
             this.SetupButton.Text = "SETUP";
             this.SetupButton.UseVisualStyleBackColor = true;
+            this.SetupButton.Click += new System.EventHandler(this.SetupButton_Click);
             // 
             // SetupProgressBar
             // 
@@ -101,6 +102,7 @@
             this.RunButton.TabIndex = 5;
             this.RunButton.Text = "RUN";
             this.RunButton.UseVisualStyleBackColor = true;
+            this.RunButton.Click += new System.EventHandler(this.RunButton_Click);
             // 
             // SeriousLauncherWindow
             // 
@@ -116,6 +118,7 @@
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "SeriousLauncherWindow";
             this.Text = "Serious Trouble Launcher";
+            this.Shown += new System.EventHandler(this.SeriousLauncherWindow_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.StatusStrip.ResumeLayout(false);
             this.StatusStrip.PerformLayout();
