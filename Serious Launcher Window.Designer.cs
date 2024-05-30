@@ -28,6 +28,7 @@
             pictureBox1 = new PictureBox();
             StatusStrip = new StatusStrip();
             StatusStripLabel = new ToolStripStatusLabel();
+            RunButton = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             StatusStrip.SuspendLayout();
             SuspendLayout();
@@ -35,11 +36,11 @@
             // SetupButton
             // 
             SetupButton.Enabled = false;
-            SetupButton.Location = new Point(891, 597);
+            SetupButton.Location = new Point(825, 597);
             SetupButton.Name = "SetupButton";
-            SetupButton.Size = new Size(94, 29);
+            SetupButton.Size = new Size(160, 29);
             SetupButton.TabIndex = 0;
-            SetupButton.Text = "Setup";
+            SetupButton.Text = "SETUP";
             SetupButton.UseVisualStyleBackColor = true;
             SetupButton.Click += SetupButton_Click;
             // 
@@ -85,11 +86,23 @@
             StatusStripLabel.Size = new Size(65, 32);
             StatusStripLabel.Text = "Status";
             // 
+            // RunButton
+            // 
+            RunButton.Enabled = false;
+            RunButton.Location = new Point(12, 597);
+            RunButton.Name = "RunButton";
+            RunButton.Size = new Size(160, 29);
+            RunButton.TabIndex = 5;
+            RunButton.Text = "RUN";
+            RunButton.UseVisualStyleBackColor = true;
+            RunButton.Click += RunButton_Click;
+            // 
             // SeriousLauncherWindow
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(997, 673);
+            Controls.Add(RunButton);
             Controls.Add(StatusStrip);
             Controls.Add(pictureBox1);
             Controls.Add(SetupProgressBar);
@@ -112,5 +125,6 @@
         private PictureBox pictureBox1;
         private StatusStrip StatusStrip;
         private ToolStripStatusLabel StatusStripLabel;
+        private Button RunButton;
     }
 }

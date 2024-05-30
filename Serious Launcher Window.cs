@@ -1,4 +1,5 @@
 using Microsoft.Win32;
+using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
 
@@ -22,6 +23,7 @@ namespace SeriousLauncher {
             }
             if (isInstalled) {
                 StatusStripLabel.Text = string.Format("Application installed by path '{0}'", this.pathToApplication);
+                RunButton.Enabled = true;
                 return;
             }
             if (this.pathToApplication == string.Empty) {
@@ -130,6 +132,16 @@ namespace SeriousLauncher {
                 }
             }
             return res;
+        }
+
+        private void RunButton_Click(object sender, EventArgs e) {
+            Process process = new();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = Path.Combine(this.pathToApplication, this.applicationFileName);
+            //process.StartInfo.Arguments = "-n";
+            //process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();
         }
     }
 }
