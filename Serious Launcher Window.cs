@@ -98,7 +98,7 @@ namespace SeriousLauncher {
         private void SetupButton_Click(object sender, EventArgs e) {
             SetupButton.Enabled = false;
             string fileName = "SeriousTrouble.zip";
-            string fullPathToArchive = Path.GetFullPath(fileName, @"C:\Users\deeffoora\Downloads");
+            string fullPathToArchive = Path.GetFullPath(fileName, @"C:\Users\deeff\Downloads");
 
 
 
