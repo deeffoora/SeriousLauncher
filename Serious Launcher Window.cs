@@ -12,14 +12,14 @@ namespace SeriousLauncher {
         private string pathToApplication = string.Empty;
 
         private void SeriousLauncherWindow_Shown(object sender, EventArgs e) {
-            //bool isInstalled = CheckRegistry();
-            bool isInstalled = false;
-            //if (isInstalled) {
-            //    StatusStripLabel.Text = string.Format("Application installed by path '{0}'", this.pathToApplication);
-            //    return;
-            //}
+            bool isInstalled = CheckFileSystem();
+            if (isInstalled) {
+                StatusStripLabel.Text = string.Format("Application installed by path '{0}'", this.pathToApplication);
+                RunButton.Enabled = true;
+                return;
+            }
             if (this.pathToApplication == string.Empty) {
-                isInstalled = CheckFileSystem();
+                isInstalled = CheckRegistry();
             }
             if (isInstalled) {
                 StatusStripLabel.Text = string.Format("Application installed by path '{0}'", this.pathToApplication);
@@ -97,8 +97,10 @@ namespace SeriousLauncher {
 
         private void SetupButton_Click(object sender, EventArgs e) {
             SetupButton.Enabled = false;
+            // Temporary path to archive
             string fileName = "SeriousTrouble.zip";
-            string fullPathToArchive = Path.GetFullPath(fileName, @"C:\Users\deeff\Downloads");
+            string userPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string fullPathToArchive = Path.GetFullPath(fileName, $@"{userPath}\Downloads");
 
 
 
