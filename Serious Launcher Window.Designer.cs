@@ -29,6 +29,7 @@
             this.StatusStrip = new System.Windows.Forms.StatusStrip();
             this.StatusStripLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.RunButton = new System.Windows.Forms.Button();
+            this.FolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.StatusStrip.SuspendLayout();
             this.SuspendLayout();
@@ -41,7 +42,7 @@
             this.SetupButton.Name = "SetupButton";
             this.SetupButton.Size = new System.Drawing.Size(140, 22);
             this.SetupButton.TabIndex = 0;
-            this.SetupButton.Text = "SETUP";
+            this.SetupButton.Text = "INSTALL";
             this.SetupButton.UseVisualStyleBackColor = true;
             this.SetupButton.Click += new System.EventHandler(this.SetupButton_Click);
             // 
@@ -104,6 +105,10 @@
             this.RunButton.UseVisualStyleBackColor = true;
             this.RunButton.Click += new System.EventHandler(this.RunButton_Click);
             // 
+            // FolderBrowserDialog
+            // 
+            this.FolderBrowserDialog.RootFolder = System.Environment.SpecialFolder.ProgramFiles;
+            // 
             // SeriousLauncherWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -135,5 +140,6 @@
         private StatusStrip StatusStrip;
         private ToolStripStatusLabel StatusStripLabel;
         private Button RunButton;
+        private FolderBrowserDialog FolderBrowserDialog;
     }
 }
