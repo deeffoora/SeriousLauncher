@@ -27,7 +27,7 @@ namespace SeriousLauncher {
                 return;
             }
             if (this.pathToApplication == string.Empty) {
-                this.pathToApplication = @$"C:\ProgrammFiles\{this.applicationDirectoryName}";
+                this.pathToApplication = @$"C:\Program Files\";
             }
             SetupButton.Enabled = true;
         }
@@ -78,11 +78,12 @@ namespace SeriousLauncher {
                 return false;
             }
             // The suggested installation path that is found in the registry
-            this.pathToApplication = supposedPath;
+            this.pathToApplication = root;
             if (Directory.Exists(supposedPath) == false) {
                 StatusStripLabel.Text = string.Format("The path does not exist '{0}'", supposedPath);
                 return false;
             }
+            this.pathToApplication = supposedPath;
             string filePath = Path.GetFullPath(Path.Combine(supposedPath, this.applicationFileName));
             if (File.Exists(filePath) == false) {
                 StatusStripLabel.Text = string.Format("Installation files are missing by '{0}'", supposedPath);
@@ -97,6 +98,9 @@ namespace SeriousLauncher {
 
         private void SetupButton_Click(object sender, EventArgs e) {
             SetupButton.Enabled = false;
+            FolderBrowserDialog.InitialDirectory = this.pathToApplication;
+            FolderBrowserDialog.ShowDialog();
+            return;
             // Temporary path to archive
             string fileName = "SeriousTrouble.zip";
             string userPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
