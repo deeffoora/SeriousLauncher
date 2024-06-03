@@ -1,5 +1,6 @@
 using Microsoft.Win32;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Compression;
 using System.Text;
 
@@ -100,13 +101,16 @@ namespace SeriousLauncher {
             SetupButton.Enabled = false;
             FolderBrowserDialog.InitialDirectory = this.pathToApplication;
             FolderBrowserDialog.ShowDialog();
-            return;
+            if (FolderBrowserDialog.SelectedPath == string.Empty) {
+                SetupButton.Enabled = true;
+                return;
+            }
+            CheckFinalInstallationPath(FolderBrowserDialog.SelectedPath);
+            StatusStripLabel.Text = this.pathToApplication;
             // Temporary path to archive
             string fileName = "SeriousTrouble.zip";
             string userPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string fullPathToArchive = Path.GetFullPath(fileName, $@"{userPath}\Downloads");
-
-
 
             using ZipArchive archive = ZipFile.OpenRead(fullPathToArchive);
             SetupProgressBar.Maximum = archive.Entries.Count;
@@ -122,8 +126,21 @@ namespace SeriousLauncher {
                 entry.ExtractToFile(Path.GetFullPath(entry.FullName, this.pathToApplication));
                 SetupProgressBar.PerformStep();
             }
+            RunButton.Enabled = true;
+            StatusStripLabel.Text =
+                string.Format("Application installed by path '{0}' (total entries: {1})",
+                this.pathToApplication, archive.Entries.Count.ToString());
+        }
 
-            StatusStripLabel.Text = archive.Entries.Count.ToString();
+        private void CheckFinalInstallationPath(string path) {
+            string dirName = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar));
+            if (dirName == this.applicationDirectoryName) {
+                return;
+            }
+            this.pathToApplication = Path.Combine(path, this.applicationDirectoryName);
+            if (Directory.Exists(this.pathToApplication) == false) {
+                Directory.CreateDirectory(this.pathToApplication);
+            }
         }
 
         private string GetKeyByTemplateName(RegistryKey subKey, string templ) {

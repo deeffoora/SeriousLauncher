@@ -23,113 +23,106 @@
         ///  the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.SetupButton = new System.Windows.Forms.Button();
-            this.SetupProgressBar = new System.Windows.Forms.ProgressBar();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.StatusStrip = new System.Windows.Forms.StatusStrip();
-            this.StatusStripLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.RunButton = new System.Windows.Forms.Button();
-            this.FolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.StatusStrip.SuspendLayout();
-            this.SuspendLayout();
+            SetupButton = new Button();
+            SetupProgressBar = new ProgressBar();
+            pictureBox1 = new PictureBox();
+            StatusStrip = new StatusStrip();
+            StatusStripLabel = new ToolStripStatusLabel();
+            RunButton = new Button();
+            FolderBrowserDialog = new FolderBrowserDialog();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            StatusStrip.SuspendLayout();
+            SuspendLayout();
             // 
             // SetupButton
             // 
-            this.SetupButton.Enabled = false;
-            this.SetupButton.Location = new System.Drawing.Point(722, 448);
-            this.SetupButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.SetupButton.Name = "SetupButton";
-            this.SetupButton.Size = new System.Drawing.Size(140, 22);
-            this.SetupButton.TabIndex = 0;
-            this.SetupButton.Text = "INSTALL";
-            this.SetupButton.UseVisualStyleBackColor = true;
-            this.SetupButton.Click += new System.EventHandler(this.SetupButton_Click);
+            SetupButton.Enabled = false;
+            SetupButton.Location = new Point(825, 597);
+            SetupButton.Name = "SetupButton";
+            SetupButton.Size = new Size(160, 29);
+            SetupButton.TabIndex = 0;
+            SetupButton.Text = "INSTALL";
+            SetupButton.UseVisualStyleBackColor = true;
+            SetupButton.Click += SetupButton_Click;
             // 
             // SetupProgressBar
             // 
-            this.SetupProgressBar.Location = new System.Drawing.Point(0, 386);
-            this.SetupProgressBar.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.SetupProgressBar.Minimum = 1;
-            this.SetupProgressBar.Name = "SetupProgressBar";
-            this.SetupProgressBar.Size = new System.Drawing.Size(872, 28);
-            this.SetupProgressBar.TabIndex = 2;
-            this.SetupProgressBar.Value = 1;
+            SetupProgressBar.Location = new Point(0, 515);
+            SetupProgressBar.Minimum = 1;
+            SetupProgressBar.Name = "SetupProgressBar";
+            SetupProgressBar.Size = new Size(997, 37);
+            SetupProgressBar.TabIndex = 2;
+            SetupProgressBar.Value = 1;
             // 
             // pictureBox1
             // 
-            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pictureBox1.ImageLocation = "https://storage.yandexcloud.net/serious-trouble-resources/SeriosLauncherBackgroun" +
-    "d.jpg";
-            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(872, 388);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 3;
-            this.pictureBox1.TabStop = false;
+            pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
+            pictureBox1.ImageLocation = "https://storage.yandexcloud.net/serious-trouble-resources/SeriosLauncherBackground.jpg";
+            pictureBox1.Location = new Point(0, 0);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(997, 517);
+            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBox1.TabIndex = 3;
+            pictureBox1.TabStop = false;
             // 
             // StatusStrip
             // 
-            this.StatusStrip.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.StatusStrip.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.StatusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.StatusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.StatusStripLabel});
-            this.StatusStrip.Location = new System.Drawing.Point(0, 481);
-            this.StatusStrip.MinimumSize = new System.Drawing.Size(0, 24);
-            this.StatusStrip.Name = "StatusStrip";
-            this.StatusStrip.Padding = new System.Windows.Forms.Padding(1, 0, 12, 0);
-            this.StatusStrip.Size = new System.Drawing.Size(872, 24);
-            this.StatusStrip.TabIndex = 4;
-            this.StatusStrip.Text = "statusStrip1";
+            StatusStrip.BackColor = SystemColors.GradientInactiveCaption;
+            StatusStrip.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            StatusStrip.ImageScalingSize = new Size(20, 20);
+            StatusStrip.Items.AddRange(new ToolStripItem[] { StatusStripLabel });
+            StatusStrip.Location = new Point(0, 641);
+            StatusStrip.MinimumSize = new Size(0, 32);
+            StatusStrip.Name = "StatusStrip";
+            StatusStrip.Size = new Size(997, 32);
+            StatusStrip.TabIndex = 4;
+            StatusStrip.Text = "statusStrip1";
             // 
             // StatusStripLabel
             // 
-            this.StatusStripLabel.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.StatusStripLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.StatusStripLabel.Margin = new System.Windows.Forms.Padding(0);
-            this.StatusStripLabel.Name = "StatusStripLabel";
-            this.StatusStripLabel.Size = new System.Drawing.Size(52, 24);
-            this.StatusStripLabel.Text = "Status";
+            StatusStripLabel.BackColor = SystemColors.GradientInactiveCaption;
+            StatusStripLabel.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            StatusStripLabel.Margin = new Padding(0);
+            StatusStripLabel.Name = "StatusStripLabel";
+            StatusStripLabel.Size = new Size(65, 32);
+            StatusStripLabel.Text = "Status";
             // 
             // RunButton
             // 
-            this.RunButton.Enabled = false;
-            this.RunButton.Location = new System.Drawing.Point(10, 448);
-            this.RunButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.RunButton.Name = "RunButton";
-            this.RunButton.Size = new System.Drawing.Size(140, 22);
-            this.RunButton.TabIndex = 5;
-            this.RunButton.Text = "RUN";
-            this.RunButton.UseVisualStyleBackColor = true;
-            this.RunButton.Click += new System.EventHandler(this.RunButton_Click);
+            RunButton.Enabled = false;
+            RunButton.Location = new Point(11, 597);
+            RunButton.Name = "RunButton";
+            RunButton.Size = new Size(160, 29);
+            RunButton.TabIndex = 5;
+            RunButton.Text = "RUN";
+            RunButton.UseVisualStyleBackColor = true;
+            RunButton.Click += RunButton_Click;
             // 
             // FolderBrowserDialog
             // 
-            this.FolderBrowserDialog.RootFolder = System.Environment.SpecialFolder.ProgramFiles;
+            FolderBrowserDialog.Description = "Select path where the folder 'Serious Trouble' will be created";
+            FolderBrowserDialog.RootFolder = Environment.SpecialFolder.ProgramFiles;
+            FolderBrowserDialog.UseDescriptionForTitle = true;
             // 
             // SeriousLauncherWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(872, 505);
-            this.Controls.Add(this.RunButton);
-            this.Controls.Add(this.StatusStrip);
-            this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.SetupProgressBar);
-            this.Controls.Add(this.SetupButton);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Name = "SeriousLauncherWindow";
-            this.Text = "Serious Trouble Launcher";
-            this.Shown += new System.EventHandler(this.SeriousLauncherWindow_Shown);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.StatusStrip.ResumeLayout(false);
-            this.StatusStrip.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(997, 673);
+            Controls.Add(RunButton);
+            Controls.Add(StatusStrip);
+            Controls.Add(pictureBox1);
+            Controls.Add(SetupProgressBar);
+            Controls.Add(SetupButton);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            Name = "SeriousLauncherWindow";
+            Text = "Serious Trouble Launcher";
+            Shown += SeriousLauncherWindow_Shown;
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            StatusStrip.ResumeLayout(false);
+            StatusStrip.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
