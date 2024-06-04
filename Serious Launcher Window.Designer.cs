@@ -23,27 +23,28 @@
         ///  the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            SetupButton = new Button();
+            InstallButton = new Button();
             SetupProgressBar = new ProgressBar();
             pictureBox1 = new PictureBox();
             StatusStrip = new StatusStrip();
             StatusStripLabel = new ToolStripStatusLabel();
             RunButton = new Button();
             FolderBrowserDialog = new FolderBrowserDialog();
+            ErrorLabel = new Label();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             StatusStrip.SuspendLayout();
             SuspendLayout();
             // 
             // SetupButton
             // 
-            SetupButton.Enabled = false;
-            SetupButton.Location = new Point(825, 597);
-            SetupButton.Name = "SetupButton";
-            SetupButton.Size = new Size(160, 29);
-            SetupButton.TabIndex = 0;
-            SetupButton.Text = "INSTALL";
-            SetupButton.UseVisualStyleBackColor = true;
-            SetupButton.Click += SetupButton_Click;
+            InstallButton.Enabled = false;
+            InstallButton.Location = new Point(825, 597);
+            InstallButton.Name = "SetupButton";
+            InstallButton.Size = new Size(160, 29);
+            InstallButton.TabIndex = 0;
+            InstallButton.Text = "INSTALL";
+            InstallButton.UseVisualStyleBackColor = true;
+            InstallButton.Click += InstallButton_Click;
             // 
             // SetupProgressBar
             // 
@@ -104,16 +105,29 @@
             FolderBrowserDialog.RootFolder = Environment.SpecialFolder.ProgramFiles;
             FolderBrowserDialog.UseDescriptionForTitle = true;
             // 
+            // ErrorLabel
+            // 
+            ErrorLabel.AutoSize = true;
+            ErrorLabel.BackColor = Color.Red;
+            ErrorLabel.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            ErrorLabel.ForeColor = Color.White;
+            ErrorLabel.Location = new Point(0, 555);
+            ErrorLabel.Margin = new Padding(0);
+            ErrorLabel.Name = "ErrorLabel";
+            ErrorLabel.Size = new Size(0, 23);
+            ErrorLabel.TabIndex = 6;
+            // 
             // SeriousLauncherWindow
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(997, 673);
+            Controls.Add(ErrorLabel);
             Controls.Add(RunButton);
             Controls.Add(StatusStrip);
             Controls.Add(pictureBox1);
             Controls.Add(SetupProgressBar);
-            Controls.Add(SetupButton);
+            Controls.Add(InstallButton);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Name = "SeriousLauncherWindow";
             Text = "Serious Trouble Launcher";
@@ -127,12 +141,13 @@
 
         #endregion
 
-        private Button SetupButton;
+        private Button InstallButton;
         private ProgressBar SetupProgressBar;
         private PictureBox pictureBox1;
         private StatusStrip StatusStrip;
         private ToolStripStatusLabel StatusStripLabel;
         private Button RunButton;
         private FolderBrowserDialog FolderBrowserDialog;
+        private Label ErrorLabel;
     }
 }

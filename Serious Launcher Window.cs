@@ -1,108 +1,115 @@
 using Microsoft.Win32;
+using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
+using System.Xml.Linq;
 
 namespace SeriousLauncher {
     public partial class SeriousLauncherWindow : Form {
-        private readonly string pathToSeriousTroubleSubKey = @"SOFTWARE\deeffoora-games\Serious Trouble\";
-        private readonly string templateAppLocationKey = @"Application location";
         private readonly string applicationFileName = @"Serious Trouble.exe";
         private readonly string applicationDirectoryName = @"Serious Trouble";
         private string pathToApplication = string.Empty;
+        private RegistryData? registryData;
 
         private void SeriousLauncherWindow_Shown(object sender, EventArgs e) {
-            bool isInstalled = CheckFileSystem();
-            if (isInstalled) {
+            this.registryData = CheckRegistryData();
+            if (CheckFileSystem()) {
                 StatusStripLabel.Text = string.Format("Application installed by path '{0}'", this.pathToApplication);
                 RunButton.Enabled = true;
+                _ = CheckUpdateAsync();
                 return;
             }
-            if (this.pathToApplication == string.Empty) {
-                isInstalled = CheckRegistry();
-            }
-            if (isInstalled) {
-                StatusStripLabel.Text = string.Format("Application installed by path '{0}'", this.pathToApplication);
-                RunButton.Enabled = true;
-                return;
-            }
+            StatusStripLabel.Text = string.Format("Application is not installed");
             if (this.pathToApplication == string.Empty) {
                 this.pathToApplication = @$"C:\Program Files\";
             }
-            SetupButton.Enabled = true;
+            InstallButton.Enabled = true;
+        }
+
+        private RegistryData? CheckRegistryData() {
+            RegistryKey? subKey = Registry.CurrentUser.OpenSubKey(RegistryData.PathToSubKey);
+            if (subKey == null) {
+                return null;
+            }
+            RegistryData instance = new() {
+                location = GetValueFromRegistryKey(subKey, RegistryData.TemplateAppLocationKey),
+                version = GetValueFromRegistryKey(subKey, RegistryData.TemplateAppVersionKey)
+            };
+            subKey.Close();
+            return instance;
         }
 
         private bool CheckFileSystem() {
-            List<string> paths = new() {
-                @$"C:\Program Files\{this.applicationDirectoryName}",
-                @$"D:\Games\{this.applicationDirectoryName}"
-            };
+            if (null == this.registryData) {
+                List<string> paths = new() {
+                    @$"C:\Program Files\{this.applicationDirectoryName}",
+                    @$"D:\Games\{this.applicationDirectoryName}"
+                };
 
-            foreach (var path in paths) {
-                if (Directory.Exists(path)) {
-                    this.pathToApplication = path;
-                    string filePath = Path.GetFullPath(Path.Combine(path, this.applicationFileName));
-                    if (File.Exists(filePath)) {
-                        return true;
+                foreach (var path in paths) {
+                    if (Directory.Exists(path)) {
+                        this.pathToApplication = path;
+                        string fullPath = Path.Combine(this.pathToApplication, this.applicationFileName);
+                        if (File.Exists(fullPath)) {
+                            return true;
+                        }
                     }
                 }
+                return false;
+
+            } else {
+                if (this.registryData.location == string.Empty) {
+                    // TODO: trow exception (Old registry entry has been found)
+                    return false;
+                } else {
+                    if (Directory.Exists(this.registryData.location)) {
+                        this.pathToApplication = this.registryData.location;
+                    }
+                    string fullPath = Path.Combine(this.pathToApplication, this.applicationFileName);
+                    if (File.Exists(fullPath)) {
+                        return true;
+                    }
+                    return false;
+                }
+
             }
-            StatusStripLabel.Text = string.Format("No installation found in file system");
-            return false;
         }
 
-        private bool CheckRegistry() {
-            RegistryKey? subKey = Registry.CurrentUser.OpenSubKey(this.pathToSeriousTroubleSubKey,
-                System.Security.AccessControl.RegistryRights.ReadKey);
-            if (subKey == null) {
-                StatusStripLabel.Text = "Application registry key is missing";
-                return false;
+        private async Task CheckUpdateAsync() {
+            string lastVersion = "";
+            HttpClient httpClient = new();
+            try {
+                HttpResponseMessage responce = await httpClient.GetAsync(LauncherData.URL);
+                string jsonResponce = await responce.Content.ReadAsStringAsync();
+                //jsonResponce = jsonResponce.Replace("{", "");
+                LauncherData? launcherData =
+                    JsonConvert.DeserializeObject<LauncherData>(jsonResponce) ?? throw new NullReferenceException();
+                lastVersion = launcherData.versions[0].version;
+            } catch (Exception e) {
+                ErrorLabel.Text = string.Format("Get launcher data exception: '{0}'", e.Message);
+            } finally {
+                httpClient.Dispose();
             }
-            string name = GetKeyByTemplateName(subKey, this.templateAppLocationKey);
-            if (name == string.Empty) {
-                StatusStripLabel.Text = string.Format("No key match by template '{0}'", this.templateAppLocationKey);
-                return false;
+            if (lastVersion.Equals(this.registryData?.version)) {
+                StatusStripLabel.Text = string.Format("Actual version '{0}'", lastVersion);
+                return;
             }
-            byte[]? sequence = (byte[]?)subKey.GetValue(name);
-            subKey.Close();
-            if (sequence == null) {
-                StatusStripLabel.Text = string.Format("Failed to extract data from '{0}' key", name);
-                return false;
-            }
-            // The last byte [00] in the sequence causes an exception
-            string trimSequence = Encoding.UTF8.GetString(sequence, 0, sequence.Length - 1);
-            string supposedPath = Path.GetFullPath(trimSequence);
-            string root = Path.GetFullPath(Path.Combine(supposedPath, @"..\"));
-            if (Directory.Exists(root) == false) {
-                StatusStripLabel.Text = string.Format("The path does not exist '{0}'", supposedPath);
-                return false;
-            }
-            // The suggested installation path that is found in the registry
-            this.pathToApplication = root;
-            if (Directory.Exists(supposedPath) == false) {
-                StatusStripLabel.Text = string.Format("The path does not exist '{0}'", supposedPath);
-                return false;
-            }
-            this.pathToApplication = supposedPath;
-            string filePath = Path.GetFullPath(Path.Combine(supposedPath, this.applicationFileName));
-            if (File.Exists(filePath) == false) {
-                StatusStripLabel.Text = string.Format("Installation files are missing by '{0}'", supposedPath);
-                return false;
-            }
-            return true;
+            StatusStripLabel.Text = string.Format("Update is required to '{0}'", lastVersion);
         }
 
         public SeriousLauncherWindow() {
             InitializeComponent();
         }
 
-        private void SetupButton_Click(object sender, EventArgs e) {
-            SetupButton.Enabled = false;
+        private void InstallButton_Click(object sender, EventArgs e) {
+            InstallButton.Enabled = false;
             FolderBrowserDialog.InitialDirectory = this.pathToApplication;
             FolderBrowserDialog.ShowDialog();
             if (FolderBrowserDialog.SelectedPath == string.Empty) {
-                SetupButton.Enabled = true;
+                InstallButton.Enabled = true;
                 return;
             }
             CheckFinalInstallationPath(FolderBrowserDialog.SelectedPath);
@@ -141,6 +148,19 @@ namespace SeriousLauncher {
             if (Directory.Exists(this.pathToApplication) == false) {
                 Directory.CreateDirectory(this.pathToApplication);
             }
+        }
+
+        private string GetValueFromRegistryKey(RegistryKey subKey, string templ) {
+            string name = GetKeyByTemplateName(subKey, templ);
+            if (name == string.Empty) {
+                return string.Empty;
+            }
+            byte[]? sequence = (byte[]?)subKey.GetValue(name);
+            if (sequence == null) {
+                return string.Empty;
+            }
+            // The last byte [00] in the sequence causes an exception
+            return Encoding.UTF8.GetString(sequence, 0, sequence.Length - 1);
         }
 
         private string GetKeyByTemplateName(RegistryKey subKey, string templ) {
