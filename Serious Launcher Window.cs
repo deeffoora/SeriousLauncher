@@ -1,8 +1,11 @@
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Compression;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
+using System.Xml.Linq;
 
 namespace SeriousLauncher {
     public partial class SeriousLauncherWindow : Form {
@@ -150,14 +153,6 @@ namespace SeriousLauncher {
             }
         }
 
-        private void RunButton_Click(object sender, EventArgs e) {
-            Process process = new();
-            process.StartInfo.FileName = Path.Combine(this.pathToApplication, this.applicationFileName);
-            //process.StartInfo.Arguments = "-n";
-            process.Start();
-            process.WaitForExit();
-        }
-
         private string GetValueFromRegistryKey(RegistryKey subKey, string templ) {
             string name = GetKeyByTemplateName(subKey, templ);
             if (name == string.Empty) {
@@ -183,6 +178,16 @@ namespace SeriousLauncher {
                 }
             }
             return res;
+        }
+
+        private void RunButton_Click(object sender, EventArgs e) {
+            Process process = new();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = Path.Combine(this.pathToApplication, this.applicationFileName);
+            //process.StartInfo.Arguments = "-n";
+            //process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();
         }
     }
 }
