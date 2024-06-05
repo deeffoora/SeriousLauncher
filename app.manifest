@@ -16,9 +16,8 @@
 
   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
     <application>
-      <!-- Список версий Windows, на которых это приложение было протестировано
-           и будет работать. Раскомментируйте соответствующие элементы, чтобы ОС Windows 
-           автоматически выбрала наиболее совместимое окружение. -->
+      <!-- A list of Windows versions on which this application has been tested and will work.
+	  Uncomment the appropriate elements so that Windows automatically selects the most compatible environment. -->
 
       <!-- Windows Vista -->
       <!--<supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}" />-->
@@ -38,12 +37,6 @@
     </application>
   </compatibility>
 
-  <!-- Указывает, что приложение поддерживает определение DPI и не будет автоматически масштабироваться Windows при более высоких
-       значениях DPI. Приложения Windows Presentation Foundation (WPF) по умолчанию поддерживают определение DPI, им не нужно 
-       специально включать параметр для этого. Для приложений Windows Forms на платформе .NET Framework 4.6, для которых задан этот параметр, необходимо 
-       также задать для "EnableWindowsFormsHighDpiAutoResizing" значение "true" в файле app.config. 
-       
-       При этом приложение начинает учитывать длинные пути. Дополнительные сведения см. на странице https://docs.microsoft.com/windows/win32/fileio/maximum-file-path-limitation.-->
   <!--
   <application xmlns="urn:schemas-microsoft-com:asm.v3">
     <windowsSettings>
@@ -53,7 +46,7 @@
   </application>
   -->
 
-  <!-- Включите темы для общих элементов управления и диалоговых окон Windows (Windows XP и более поздние версии) -->
+  <!-- Enable themes for common Windows controls and dialog boxes (Windows XP and later) -->
   <!--
   <dependency>
     <dependentAssembly>
