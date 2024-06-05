@@ -24,7 +24,7 @@ namespace SeriousLauncher {
             }
             StatusStripLabel.Text = string.Format("Application is not installed");
             if (this.pathToApplication == string.Empty) {
-                this.pathToApplication = @$"C:\Program Files\";
+                this.pathToApplication = @$"C:\Program Files";
             }
             InstallButton.Enabled = true;
         }
@@ -35,7 +35,7 @@ namespace SeriousLauncher {
                 return null;
             }
             RegistryData instance = new() {
-                location = GetValueFromRegistryKey(subKey, RegistryData.TemplateAppLocationKey),
+                location = GetValueFromRegistryKey(subKey, RegistryData.TemplateAppLocationKey).TrimEnd('\\'),
                 version = GetValueFromRegistryKey(subKey, RegistryData.TemplateAppVersionKey)
             };
             subKey.Close();
@@ -43,39 +43,37 @@ namespace SeriousLauncher {
         }
 
         private bool CheckFileSystem() {
-            if (null == this.registryData) {
-                List<string> paths = new() {
-                    @$"C:\Program Files\{this.applicationDirectoryName}",
-                    @$"D:\Games\{this.applicationDirectoryName}"
-                };
+            List<string> paths = new() {
+                @$"C:\Program Files\{this.applicationDirectoryName}",
+                @$"D:\Games\{this.applicationDirectoryName}"
+            };
 
-                foreach (var path in paths) {
-                    if (Directory.Exists(path)) {
-                        this.pathToApplication = path;
-                        string fullPath = Path.Combine(this.pathToApplication, this.applicationFileName);
-                        if (File.Exists(fullPath)) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-
-            } else {
-                if (this.registryData.location == string.Empty) {
-                    // TODO: trow exception (Old registry entry has been found)
-                    return false;
-                } else {
-                    if (Directory.Exists(this.registryData.location)) {
-                        this.pathToApplication = this.registryData.location;
-                    }
-                    string fullPath = Path.Combine(this.pathToApplication, this.applicationFileName);
-                    if (File.Exists(fullPath)) {
+            foreach (var path in paths) {
+                if (Directory.Exists(path)) {
+                    this.pathToApplication = path;
+                    if (File.Exists(Path.Combine(this.pathToApplication, this.applicationFileName))) {
                         return true;
                     }
-                    return false;
                 }
-
             }
+
+            if (null == this.registryData) {
+                return false;
+            }
+            if (this.registryData.location == string.Empty) {
+                // TODO: trow exception (Old registry entry has been found)
+                return false;
+            }
+            if (this.registryData.location.Equals(this.pathToApplication)) {
+                return false;
+            }
+            if (Directory.Exists(this.registryData.location)) {
+                this.pathToApplication = this.registryData.location;
+            }
+            if (File.Exists(Path.Combine(this.pathToApplication, this.applicationFileName))) {
+                return true;
+            }
+            return false;
         }
 
         private async Task CheckUpdateAsync() {
