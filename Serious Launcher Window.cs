@@ -18,7 +18,6 @@ namespace SeriousLauncher {
             this.registryData = CheckRegistryData();
             if (CheckFileSystem()) {
                 StatusStripLabel.Text = string.Format("Application installed by path '{0}'", this.pathToApplication);
-                RunButton.Enabled = true;
                 _ = CheckUpdateAsync();
                 return;
             }
@@ -35,7 +34,7 @@ namespace SeriousLauncher {
                 return null;
             }
             RegistryData instance = new() {
-                location = GetValueFromRegistryKey(subKey, RegistryData.TemplateAppLocationKey).TrimEnd('\\'),
+                location = GetValueFromRegistryKey(subKey, RegistryData.TemplateAppLocationKey).TrimEnd(Path.DirectorySeparatorChar),
                 version = GetValueFromRegistryKey(subKey, RegistryData.TemplateAppVersionKey)
             };
             subKey.Close();
@@ -67,10 +66,9 @@ namespace SeriousLauncher {
             if (this.registryData.location.Equals(this.pathToApplication)) {
                 return false;
             }
-            if (Directory.Exists(this.registryData.location)) {
+            if (Directory.Exists(this.registryData.location) &&
+                File.Exists(Path.Combine(this.registryData.location, this.applicationFileName))) {
                 this.pathToApplication = this.registryData.location;
-            }
-            if (File.Exists(Path.Combine(this.pathToApplication, this.applicationFileName))) {
                 return true;
             }
             return false;
@@ -82,20 +80,26 @@ namespace SeriousLauncher {
             try {
                 HttpResponseMessage responce = await httpClient.GetAsync(LauncherData.URL);
                 string jsonResponce = await responce.Content.ReadAsStringAsync();
-                //jsonResponce = jsonResponce.Replace("{", "");
                 LauncherData? launcherData =
                     JsonConvert.DeserializeObject<LauncherData>(jsonResponce) ?? throw new NullReferenceException();
                 lastVersion = launcherData.versions[0].version;
             } catch (Exception e) {
                 ErrorLabel.Text = string.Format("Get launcher data exception: '{0}'", e.Message);
+                RunButton.Enabled = true;
+                lastVersion = string.Empty;
             } finally {
                 httpClient.Dispose();
             }
-            if (lastVersion.Equals(this.registryData?.version)) {
-                StatusStripLabel.Text = string.Format("Actual version '{0}'", lastVersion);
+            if (lastVersion.Equals(string.Empty)) {
                 return;
             }
-            StatusStripLabel.Text = string.Format("Update is required to '{0}'", lastVersion);
+            if (lastVersion.Equals(this.registryData?.version)) {
+                StatusStripLabel.Text = string.Format("Actual version: {0}", lastVersion);
+                RunButton.Enabled = true;
+                return;
+            }
+            StatusStripLabel.Text = string.Format("Required update: {0}", lastVersion);
+            InstallButton.Enabled = true;
         }
 
         public SeriousLauncherWindow() {
@@ -111,7 +115,6 @@ namespace SeriousLauncher {
                 return;
             }
             CheckFinalInstallationPath(FolderBrowserDialog.SelectedPath);
-            StatusStripLabel.Text = this.pathToApplication;
             // Temporary path to archive
             string fileName = "SeriousTrouble.zip";
             string userPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -128,7 +131,9 @@ namespace SeriousLauncher {
                 if (Directory.Exists(entryPath) == false) {
                     Directory.CreateDirectory(entryPath);
                 }
-                entry.ExtractToFile(Path.GetFullPath(entry.FullName, this.pathToApplication));
+                string fullPath = Path.GetFullPath(entry.FullName, this.pathToApplication);
+                File.Delete(fullPath);
+                entry.ExtractToFile(fullPath);
                 SetupProgressBar.PerformStep();
             }
             RunButton.Enabled = true;
