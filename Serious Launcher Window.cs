@@ -1,8 +1,12 @@
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Net;
+using System.Net.Http;
 using System.Text;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace SeriousLauncher {
     public partial class SeriousLauncherWindow : Form {
@@ -103,19 +107,25 @@ namespace SeriousLauncher {
             InitializeComponent();
         }
 
-        private void InstallButton_Click(object sender, EventArgs e) {
-            InstallButton.Enabled = false;
+        private async void InstallButton_Click(object sender, EventArgs e) {
             FolderBrowserDialog.InitialDirectory = this.pathToApplication;
             FolderBrowserDialog.ShowDialog();
             if (FolderBrowserDialog.SelectedPath == string.Empty) {
+                return;
+            }
+            InstallButton.Enabled = false;
+            ErrorLabel.Text = string.Empty;
+            CheckFinalInstallationPath(FolderBrowserDialog.SelectedPath);
+            FolderBrowserDialog.SelectedPath = string.Empty;
+            //string fileName = "Serious Trouble.zip";
+            string fileName = "Debugging archive.zip";
+            string localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string fullPathToArchive = Path.GetFullPath(fileName, localApplicationData);
+            await DownloadArchiveAsync(fullPathToArchive);
+            if (File.Exists(fullPathToArchive) == false) {
                 InstallButton.Enabled = true;
                 return;
             }
-            CheckFinalInstallationPath(FolderBrowserDialog.SelectedPath);
-            // Temporary path to archive
-            string fileName = "SeriousTrouble.zip";
-            string userPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            string fullPathToArchive = Path.GetFullPath(fileName, $@"{userPath}\Downloads");
 
             using ZipArchive archive = ZipFile.OpenRead(fullPathToArchive);
             SetupProgressBar.Maximum = archive.Entries.Count;
@@ -139,6 +149,35 @@ namespace SeriousLauncher {
                 this.pathToApplication, archive.Entries.Count.ToString());
         }
 
+        private async Task DownloadArchiveAsync(string path) {
+
+            string url = "https://storage.yandexcloud.net/serious-trouble-resources/Debugging%20archive.zip";
+
+            HttpClient client = new() {
+                Timeout = TimeSpan.FromSeconds(120)
+            };
+            try {
+                byte[] bytes = await client.GetByteArrayAsync(new Uri(url));
+                await File.WriteAllBytesAsync(path, bytes);
+            } catch (Exception e) {
+                ErrorLabel.Text = string.Format("Download archive exception: '{0}'", e.Message);
+            } finally {
+                client.Dispose();
+            }
+        }
+
+        private void DownloadFileCompletedEventHandler(object? sender, AsyncCompletedEventArgs e) {
+            throw new NotImplementedException();
+        }
+
+        private void RunButton_Click(object sender, EventArgs e) {
+            Process process = new();
+            process.StartInfo.FileName = Path.Combine(this.pathToApplication, this.applicationFileName);
+            //process.StartInfo.Arguments = "-n";
+            process.Start();
+            process.WaitForExit();
+        }
+
         private void CheckFinalInstallationPath(string path) {
             string dirName = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar));
             if (dirName == this.applicationDirectoryName) {
@@ -148,14 +187,6 @@ namespace SeriousLauncher {
             if (Directory.Exists(this.pathToApplication) == false) {
                 Directory.CreateDirectory(this.pathToApplication);
             }
-        }
-
-        private void RunButton_Click(object sender, EventArgs e) {
-            Process process = new();
-            process.StartInfo.FileName = Path.Combine(this.pathToApplication, this.applicationFileName);
-            //process.StartInfo.Arguments = "-n";
-            process.Start();
-            process.WaitForExit();
         }
 
         private string GetValueFromRegistryKey(RegistryKey subKey, string templ) {
