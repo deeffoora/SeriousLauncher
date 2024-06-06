@@ -3,10 +3,8 @@ using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Compression;
-using System.Net;
-using System.Net.Http;
 using System.Text;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using HttpClientProgress;
 
 namespace SeriousLauncher {
     public partial class SeriousLauncherWindow : Form {
@@ -14,6 +12,7 @@ namespace SeriousLauncher {
         private readonly string applicationDirectoryName = @"Serious Trouble";
         private string pathToApplication = string.Empty;
         private RegistryData? registryData;
+        private LauncherData? launcherData;
 
         private void SeriousLauncherWindow_Shown(object sender, EventArgs e) {
             this.registryData = CheckRegistryData();
@@ -81,8 +80,7 @@ namespace SeriousLauncher {
             try {
                 HttpResponseMessage responce = await httpClient.GetAsync(LauncherData.URL);
                 string jsonResponce = await responce.Content.ReadAsStringAsync();
-                LauncherData? launcherData =
-                    JsonConvert.DeserializeObject<LauncherData>(jsonResponce) ?? throw new NullReferenceException();
+                this.launcherData = JsonConvert.DeserializeObject<LauncherData>(jsonResponce) ?? throw new NullReferenceException();
                 lastVersion = launcherData.versions[0].version;
             } catch (Exception e) {
                 ErrorLabel.Text = string.Format("Get launcher data exception: '{0}'", e.Message);
@@ -127,36 +125,43 @@ namespace SeriousLauncher {
                 return;
             }
 
-            using ZipArchive archive = ZipFile.OpenRead(fullPathToArchive);
-            SetupProgressBar.Maximum = archive.Entries.Count;
-            foreach (ZipArchiveEntry entry in archive.Entries) {
-                string? entryPath = Path.GetDirectoryName(entry.FullName);
-                if (string.IsNullOrEmpty(entryPath)) {
-                    entryPath = @".\";
+            using ZipArchive archive = ZipFile.OpenRead(fullPathToArchive){
+                SetupProgressBar.Maximum = archive.Entries.Count;
+                foreach (ZipArchiveEntry entry in archive.Entries) {
+                    string? entryPath = Path.GetDirectoryName(entry.FullName);
+                    if (string.IsNullOrEmpty(entryPath)) {
+                        entryPath = @".\";
+                    }
+                    entryPath = Path.GetFullPath(entryPath, this.pathToApplication);
+                    if (Directory.Exists(entryPath) == false) {
+                        Directory.CreateDirectory(entryPath);
+                    }
+                    string fullPath = Path.GetFullPath(entry.FullName, this.pathToApplication);
+                    File.Delete(fullPath);
+                    entry.ExtractToFile(fullPath);
+                    SetupProgressBar.PerformStep();
                 }
-                entryPath = Path.GetFullPath(entryPath, this.pathToApplication);
-                if (Directory.Exists(entryPath) == false) {
-                    Directory.CreateDirectory(entryPath);
-                }
-                string fullPath = Path.GetFullPath(entry.FullName, this.pathToApplication);
-                File.Delete(fullPath);
-                entry.ExtractToFile(fullPath);
-                SetupProgressBar.PerformStep();
+                RunButton.Enabled = true;
+                StatusStripLabel.Text =
+                    string.Format("Application installed by path '{0}' (total entries: {1})",
+                    this.pathToApplication, archive.Entries.Count.ToString());
             }
-            RunButton.Enabled = true;
-            StatusStripLabel.Text =
-                string.Format("Application installed by path '{0}' (total entries: {1})",
-                this.pathToApplication, archive.Entries.Count.ToString());
+
+            //archive.Dispose();
+            File.Delete(fullPathToArchive);
         }
 
         private async Task DownloadArchiveAsync(string path) {
-
-            string url = "https://storage.yandexcloud.net/serious-trouble-resources/Debugging%20archive.zip";
+            //string url = "https://storage.yandexcloud.net/serious-trouble-resources/Debugging%20archive.zip";
 
             HttpClient client = new() {
                 Timeout = TimeSpan.FromSeconds(120)
             };
             try {
+                if (this.launcherData == null || this.launcherData.versions.Count < 1) {
+                    throw new ApplicationException("URL is not defined");
+                }
+                string url = this.launcherData.versions[0].buildPath;
                 byte[] bytes = await client.GetByteArrayAsync(new Uri(url));
                 await File.WriteAllBytesAsync(path, bytes);
             } catch (Exception e) {
@@ -165,6 +170,24 @@ namespace SeriousLauncher {
                 client.Dispose();
             }
         }
+
+        //private async Task DownloadArchiveAsync(string path) {
+        //    string url = "https://storage.yandexcloud.net/serious-trouble-resources/Debugging%20archive.zip";
+
+        //    WebClient client = new();
+        //    client.DownloadDataCompleted += DownloadFileCompletedEventHandler;
+        //    try {
+        //        //if(this.launcherData == null || this.launcherData.versions.Count < 1) {
+        //        //    throw new ApplicationException("URL is not defined");
+        //        //}
+        //        //string url = this.launcherData.versions[0].buildPath;
+        //        client.DownloadFileAsync(new Uri(url), path);
+        //    } catch (Exception e) {
+        //        ErrorLabel.Text = string.Format("Download archive exception: '{0}'", e.Message);
+        //    } finally {
+        //        client.Dispose();
+        //    }
+        //}
 
         private void DownloadFileCompletedEventHandler(object? sender, AsyncCompletedEventArgs e) {
             throw new NotImplementedException();
