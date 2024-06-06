@@ -115,17 +115,17 @@ namespace SeriousLauncher {
             ErrorLabel.Text = string.Empty;
             CheckFinalInstallationPath(FolderBrowserDialog.SelectedPath);
             FolderBrowserDialog.SelectedPath = string.Empty;
-            //string fileName = "Serious Trouble.zip";
-            string fileName = "Debugging archive.zip";
-            string localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            string fullPathToArchive = Path.GetFullPath(fileName, localApplicationData);
-            await DownloadArchiveAsync(fullPathToArchive);
+            string fileName = "Serious Trouble.zip";
+            //string fileName = "Debugging archive.zip";
+            string fullPathToArchive = Path.GetFullPath(fileName, Path.GetTempPath());
+            //await DownloadArchiveAsync(fullPathToArchive);
+            await DownloadArchive(fullPathToArchive);
             if (File.Exists(fullPathToArchive) == false) {
                 InstallButton.Enabled = true;
                 return;
             }
 
-            using ZipArchive archive = ZipFile.OpenRead(fullPathToArchive){
+            using (ZipArchive archive = ZipFile.OpenRead(fullPathToArchive)) {
                 SetupProgressBar.Maximum = archive.Entries.Count;
                 foreach (ZipArchiveEntry entry in archive.Entries) {
                     string? entryPath = Path.GetDirectoryName(entry.FullName);
@@ -171,6 +171,35 @@ namespace SeriousLauncher {
             }
         }
 
+        private async Task DownloadArchive(string path) {
+            var client = new HttpClient();
+
+
+
+            if (this.launcherData == null || this.launcherData.versions.Count < 1) {
+                throw new ApplicationException("URL is not defined");
+            }
+            string url = this.launcherData.versions[0].buildPath;
+
+
+
+            // Customize our progress report
+            Progress<float> progress = new();
+            progress.ProgressChanged += ProgressChangedEventHandler;
+
+            using (FileStream file = new(path, FileMode.Create, FileAccess.Write, FileShare.None)) {
+                await client.DownloadDataAsync(url, file, progress);
+            }
+        }
+
+        private void ProgressChangedEventHandler(object? sender, float progress) {
+            StatusStripLabel.Text = string.Format("Progress: {0}", progress);
+        }
+
+        private void DownloadFileCompletedEventHandler(object? sender, AsyncCompletedEventArgs e) {
+            throw new NotImplementedException();
+        }
+
         //private async Task DownloadArchiveAsync(string path) {
         //    string url = "https://storage.yandexcloud.net/serious-trouble-resources/Debugging%20archive.zip";
 
@@ -188,10 +217,6 @@ namespace SeriousLauncher {
         //        client.Dispose();
         //    }
         //}
-
-        private void DownloadFileCompletedEventHandler(object? sender, AsyncCompletedEventArgs e) {
-            throw new NotImplementedException();
-        }
 
         private void RunButton_Click(object sender, EventArgs e) {
             Process process = new();

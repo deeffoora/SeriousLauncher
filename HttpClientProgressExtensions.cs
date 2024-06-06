@@ -24,7 +24,13 @@
             float GetProgressPercentage(float totalBytes, float currentBytes) => (totalBytes / currentBytes) * 100f;
         }
 
-        static async Task CopyToAsync(this Stream source, Stream destination, int bufferSize, IProgress<long> progress = null, CancellationToken cancellationToken = default(CancellationToken)) {
+        static async Task CopyToAsync(
+            this Stream source,
+            Stream destination,
+            int bufferSize,
+            IProgress<long> progress = null,
+            CancellationToken cancellationToken = default(CancellationToken)
+        ) {
             if (bufferSize < 0)
                 throw new ArgumentOutOfRangeException(nameof(bufferSize));
             if (source is null)
