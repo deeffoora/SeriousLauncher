@@ -8,22 +8,21 @@ namespace HttpClientProgress {
             string requestUrl,
             Stream destination,
             IProgress<float> progress = null,
-            CancellationToken cancellationToken = default(CancellationToken)
+            CancellationToken cancellationToken = default
         ) {
             using (var response = await client.GetAsync(requestUrl, HttpCompletionOption.ResponseHeadersRead)) {
                 var contentLength = response.Content.Headers.ContentLength;
                 using (var download = await response.Content.ReadAsStreamAsync()) {
-                    // no progress... no contentLength... very sad
+                    // No progress, no contentLength, normal copying
                     if (progress is null || !contentLength.HasValue) {
                         await download.CopyToAsync(destination);
                         return;
                     }
-                    // Such progress and contentLength much reporting Wow!
+                    // It is possible to cause an extension
                     var progressWrapper = new Progress<long>(totalBytes => progress.Report(GetProgressPercentage(totalBytes, contentLength.Value)));
                     await download.CopyToAsync(destination, 81920, progressWrapper, cancellationToken);
                 }
             }
-
             float GetProgressPercentage(float totalBytes, float currentBytes) => (totalBytes / currentBytes) * 100f;
         }
 
@@ -32,7 +31,7 @@ namespace HttpClientProgress {
             Stream destination,
             int bufferSize,
             IProgress<long> progress = null,
-            CancellationToken cancellationToken = default(CancellationToken)
+            CancellationToken cancellationToken = default
         ) {
             if (bufferSize < 0)
                 throw new ArgumentOutOfRangeException(nameof(bufferSize));
