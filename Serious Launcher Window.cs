@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
 using HttpClientProgress;
+using System;
 
 namespace SeriousLauncher {
     public partial class SeriousLauncherWindow : Form {
@@ -15,6 +16,13 @@ namespace SeriousLauncher {
         private LauncherData? launcherData;
 
         private async void SeriousLauncherWindow_Shown(object sender, EventArgs e) {
+            await InitLauncher();
+        }
+
+        private async Task InitLauncher() {
+            RunButton.Enabled = false;
+            UpdateButton.Enabled = false;
+            UpdateButton.Text = "UPDATE";
             StatusLabel.Text = string.Format("Get launcher data...");
             GetRegistryData();
             await GetLauncherData();
@@ -28,7 +36,8 @@ namespace SeriousLauncher {
             if (this.pathToApplication == string.Empty) {
                 this.pathToApplication = @$"C:\Program Files";
             }
-            InstallButton.Enabled = true;
+            UpdateButton.Text = "INSTALL";
+            UpdateButton.Enabled = true;
         }
 
         private void GetRegistryData() {
@@ -107,7 +116,7 @@ namespace SeriousLauncher {
                 return;
             }
             StatusLabel.Text = string.Format("Required update: {0}", last);
-            InstallButton.Enabled = true;
+            UpdateButton.Enabled = true;
         }
 
         public SeriousLauncherWindow() {
@@ -120,21 +129,22 @@ namespace SeriousLauncher {
             if (FolderBrowserDialog.SelectedPath == string.Empty) {
                 return;
             }
-            InstallButton.Enabled = false;
+            UpdateButton.Enabled = false;
             ErrorLabel.Text = string.Empty;
             CheckFinalInstallationPath(FolderBrowserDialog.SelectedPath);
             FolderBrowserDialog.SelectedPath = string.Empty;
             string fileName = "Serious Trouble.zip";
             //string fileName = "Debugging archive.zip";
             string pathToArchive = Path.GetFullPath(fileName, Path.GetTempPath());
+            InitProgressBar(100);
             await DownloadArchiveAsync(pathToArchive);
             if (File.Exists(pathToArchive) == false) {
-                InstallButton.Enabled = true;
+                UpdateButton.Enabled = true;
                 return;
             }
 
             using (ZipArchive archive = ZipFile.OpenRead(pathToArchive)) {
-                SetupProgressBar.Maximum = archive.Entries.Count;
+                InitProgressBar(archive.Entries.Count);
                 foreach (ZipArchiveEntry entry in archive.Entries) {
                     string? entryPath = Path.GetDirectoryName(entry.FullName);
                     if (string.IsNullOrEmpty(entryPath)) {
@@ -147,7 +157,7 @@ namespace SeriousLauncher {
                     string fullPath = Path.GetFullPath(entry.FullName, this.pathToApplication);
                     File.Delete(fullPath);
                     entry.ExtractToFile(fullPath);
-                    SetupProgressBar.PerformStep();
+                    this.SetupProgressBar.PerformStep();
                 }
                 RunButton.Enabled = true;
                 StatusLabel.Text =
@@ -161,15 +171,16 @@ namespace SeriousLauncher {
             HttpClient client = new() {
                 Timeout = TimeSpan.FromSeconds(120)
             };
+            Progress<float> progress = new();
+            progress.ProgressChanged += ProgressChangedEventHandler;
 
             try {
                 if (this.launcherData == null || this.launcherData.versions.Count < 1) {
                     throw new ApplicationException("URL is not defined");
                 }
+                // TODO: To iterate through values
                 //string url = "https://storage.yandexcloud.net/serious-trouble-resources/Debugging%20archive.zip";
                 string url = this.launcherData.versions[0].buildPath;
-                Progress<float> progress = new();
-                progress.ProgressChanged += ProgressChangedEventHandler;
 
                 using FileStream file = new(path, FileMode.Create, FileAccess.Write, FileShare.None);
                 await client.DownloadDataAsync(url, file, progress);
@@ -177,33 +188,17 @@ namespace SeriousLauncher {
                 ErrorLabel.Text = string.Format("Download archive exception: '{0}'", e.Message);
             } finally {
                 client.Dispose();
+                progress.ProgressChanged -= ProgressChangedEventHandler;
             }
         }
 
         private void ProgressChangedEventHandler(object? sender, float progress) {
-            StatusLabel.Text = string.Format("Progress: {0}", progress);
+            this.SetupProgressBar.Value = (int)progress;
+            //this.StatusLabel.Text = progress.ToString();
         }
 
-        private void DownloadFileCompletedEventHandler(object? sender, AsyncCompletedEventArgs e) {
-            throw new NotImplementedException();
-        }
-
-        //private async Task DownloadArchiveAsync(string path) {
-        //    string url = "https://storage.yandexcloud.net/serious-trouble-resources/Debugging%20archive.zip";
-
-        //    WebClient client = new();
-        //    client.DownloadDataCompleted += DownloadFileCompletedEventHandler;
-        //    try {
-        //        //if(this.launcherData == null || this.launcherData.versions.Count < 1) {
-        //        //    throw new ApplicationException("URL is not defined");
-        //        //}
-        //        //string url = this.launcherData.versions[0].buildPath;
-        //        client.DownloadFileAsync(new Uri(url), path);
-        //    } catch (Exception e) {
-        //        ErrorLabel.Text = string.Format("Download archive exception: '{0}'", e.Message);
-        //    } finally {
-        //        client.Dispose();
-        //    }
+        //private void DownloadFileCompletedEventHandler(object? sender, AsyncCompletedEventArgs e) {
+        //    throw new NotImplementedException();
         //}
 
         private void RunButton_Click(object sender, EventArgs e) {
@@ -250,6 +245,12 @@ namespace SeriousLauncher {
                 }
             }
             return res;
+        }
+
+        private void InitProgressBar(int count) {
+            this.SetupProgressBar.Minimum = 0;
+            this.SetupProgressBar.Maximum = count;
+            this.SetupProgressBar.Value = 0;
         }
     }
 }

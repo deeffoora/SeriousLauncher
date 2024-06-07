@@ -24,7 +24,7 @@
         /// </summary>
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SeriousLauncherWindow));
-            InstallButton = new Button();
+            UpdateButton = new Button();
             SetupProgressBar = new ProgressBar();
             pictureBox1 = new PictureBox();
             StatusStrip = new StatusStrip();
@@ -36,25 +36,25 @@
             StatusStrip.SuspendLayout();
             SuspendLayout();
             // 
-            // InstallButton
+            // UpdateButton
             // 
-            InstallButton.Enabled = false;
-            InstallButton.Location = new Point(825, 597);
-            InstallButton.Name = "InstallButton";
-            InstallButton.Size = new Size(160, 29);
-            InstallButton.TabIndex = 0;
-            InstallButton.Text = "INSTALL";
-            InstallButton.UseVisualStyleBackColor = true;
-            InstallButton.Click += InstallButton_Click;
+            UpdateButton.Enabled = false;
+            UpdateButton.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            UpdateButton.ForeColor = Color.RoyalBlue;
+            UpdateButton.Location = new Point(825, 597);
+            UpdateButton.Name = "UpdateButton";
+            UpdateButton.Size = new Size(160, 29);
+            UpdateButton.TabIndex = 0;
+            UpdateButton.Text = "UPDATE";
+            UpdateButton.UseVisualStyleBackColor = true;
+            UpdateButton.Click += InstallButton_Click;
             // 
             // SetupProgressBar
             // 
             SetupProgressBar.Location = new Point(0, 515);
-            SetupProgressBar.Minimum = 1;
             SetupProgressBar.Name = "SetupProgressBar";
             SetupProgressBar.Size = new Size(997, 37);
             SetupProgressBar.TabIndex = 2;
-            SetupProgressBar.Value = 1;
             // 
             // pictureBox1
             // 
@@ -92,6 +92,8 @@
             // RunButton
             // 
             RunButton.Enabled = false;
+            RunButton.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            RunButton.ForeColor = Color.RoyalBlue;
             RunButton.Location = new Point(11, 597);
             RunButton.Name = "RunButton";
             RunButton.Size = new Size(160, 29);
@@ -128,9 +130,10 @@
             Controls.Add(StatusStrip);
             Controls.Add(pictureBox1);
             Controls.Add(SetupProgressBar);
-            Controls.Add(InstallButton);
+            Controls.Add(UpdateButton);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximizeBox = false;
             Name = "SeriousLauncherWindow";
             Text = "Serious Trouble Launcher";
             Shown += SeriousLauncherWindow_Shown;
@@ -143,7 +146,7 @@
 
         #endregion
 
-        private Button InstallButton;
+        private Button UpdateButton;
         private ProgressBar SetupProgressBar;
         private PictureBox pictureBox1;
         private StatusStrip StatusStrip;
