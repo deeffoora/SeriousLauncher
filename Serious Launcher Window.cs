@@ -14,31 +14,47 @@ namespace SeriousLauncher {
         private RegistryData? registryData;
         private LauncherData? launcherData;
 
-        private void SeriousLauncherWindow_Shown(object sender, EventArgs e) {
-            this.registryData = CheckRegistryData();
+        private async void SeriousLauncherWindow_Shown(object sender, EventArgs e) {
+            StatusLabel.Text = string.Format("Get launcher data...");
+            GetRegistryData();
+            await GetLauncherData();
+            StatusLabel.Text = string.Empty;
             if (CheckFileSystem()) {
-                StatusStripLabel.Text = string.Format("Application installed by path '{0}'", this.pathToApplication);
-                _ = CheckUpdateAsync();
+                StatusLabel.Text = string.Format("Application installed by path '{0}'", this.pathToApplication);
+                CheckUpdate();
                 return;
             }
-            StatusStripLabel.Text = string.Format("Application is not installed");
+            StatusLabel.Text = string.Format("Application is not installed");
             if (this.pathToApplication == string.Empty) {
                 this.pathToApplication = @$"C:\Program Files";
             }
             InstallButton.Enabled = true;
         }
 
-        private RegistryData? CheckRegistryData() {
+        private void GetRegistryData() {
             RegistryKey? subKey = Registry.CurrentUser.OpenSubKey(RegistryData.PathToSubKey);
             if (subKey == null) {
-                return null;
+                return;
             }
-            RegistryData instance = new() {
+            this.registryData = new() {
                 location = GetValueFromRegistryKey(subKey, RegistryData.TemplateAppLocationKey).TrimEnd(Path.DirectorySeparatorChar),
                 version = GetValueFromRegistryKey(subKey, RegistryData.TemplateAppVersionKey)
             };
             subKey.Close();
-            return instance;
+        }
+
+        private async Task GetLauncherData() {
+            HttpClient client = new();
+            try {
+                HttpResponseMessage responce = await client.GetAsync(LauncherData.URL);
+                string jsonResponce = await responce.Content.ReadAsStringAsync();
+                this.launcherData =
+                    JsonConvert.DeserializeObject<LauncherData>(jsonResponce) ?? throw new NullReferenceException();
+            } catch (Exception e) {
+                ErrorLabel.Text = string.Format("Get launcher data exception: '{0}'", e.Message);
+            } finally {
+                client.Dispose();
+            }
         }
 
         private bool CheckFileSystem() {
@@ -60,7 +76,7 @@ namespace SeriousLauncher {
                 return false;
             }
             if (this.registryData.location == string.Empty) {
-                // TODO: trow exception (Old registry entry has been found)
+                // TODO: Throw exception (old registry entry has been found)
                 return false;
             }
             if (this.registryData.location.Equals(this.pathToApplication)) {
@@ -74,30 +90,23 @@ namespace SeriousLauncher {
             return false;
         }
 
-        private async Task CheckUpdateAsync() {
-            string lastVersion = "";
-            HttpClient httpClient = new();
-            try {
-                HttpResponseMessage responce = await httpClient.GetAsync(LauncherData.URL);
-                string jsonResponce = await responce.Content.ReadAsStringAsync();
-                this.launcherData = JsonConvert.DeserializeObject<LauncherData>(jsonResponce) ?? throw new NullReferenceException();
-                lastVersion = launcherData.versions[0].version;
-            } catch (Exception e) {
-                ErrorLabel.Text = string.Format("Get launcher data exception: '{0}'", e.Message);
-                RunButton.Enabled = true;
-                lastVersion = string.Empty;
-            } finally {
-                httpClient.Dispose();
-            }
-            if (lastVersion.Equals(string.Empty)) {
-                return;
-            }
-            if (lastVersion.Equals(this.registryData?.version)) {
-                StatusStripLabel.Text = string.Format("Actual version: {0}", lastVersion);
+        private void CheckUpdate() {
+            if (this.launcherData == null) {
+                StatusLabel.Text = string.Format("Impossible to check the version");
                 RunButton.Enabled = true;
                 return;
             }
-            StatusStripLabel.Text = string.Format("Required update: {0}", lastVersion);
+            // TODO: To iterate through values
+            string last = launcherData.versions[0].version;
+            if (last.Equals(string.Empty)) {
+                return;
+            }
+            if (last.Equals(this.registryData?.version)) {
+                StatusLabel.Text = string.Format("Actual version: {0}", last);
+                RunButton.Enabled = true;
+                return;
+            }
+            StatusLabel.Text = string.Format("Required update: {0}", last);
             InstallButton.Enabled = true;
         }
 
@@ -117,15 +126,14 @@ namespace SeriousLauncher {
             FolderBrowserDialog.SelectedPath = string.Empty;
             string fileName = "Serious Trouble.zip";
             //string fileName = "Debugging archive.zip";
-            string fullPathToArchive = Path.GetFullPath(fileName, Path.GetTempPath());
-            //await DownloadArchiveAsync(fullPathToArchive);
-            await DownloadArchive(fullPathToArchive);
-            if (File.Exists(fullPathToArchive) == false) {
+            string pathToArchive = Path.GetFullPath(fileName, Path.GetTempPath());
+            await DownloadArchiveAsync(pathToArchive);
+            if (File.Exists(pathToArchive) == false) {
                 InstallButton.Enabled = true;
                 return;
             }
 
-            using (ZipArchive archive = ZipFile.OpenRead(fullPathToArchive)) {
+            using (ZipArchive archive = ZipFile.OpenRead(pathToArchive)) {
                 SetupProgressBar.Maximum = archive.Entries.Count;
                 foreach (ZipArchiveEntry entry in archive.Entries) {
                     string? entryPath = Path.GetDirectoryName(entry.FullName);
@@ -142,28 +150,29 @@ namespace SeriousLauncher {
                     SetupProgressBar.PerformStep();
                 }
                 RunButton.Enabled = true;
-                StatusStripLabel.Text =
+                StatusLabel.Text =
                     string.Format("Application installed by path '{0}' (total entries: {1})",
                     this.pathToApplication, archive.Entries.Count.ToString());
             }
-
-            //archive.Dispose();
-            File.Delete(fullPathToArchive);
+            File.Delete(pathToArchive);
         }
 
         private async Task DownloadArchiveAsync(string path) {
-            //string url = "https://storage.yandexcloud.net/serious-trouble-resources/Debugging%20archive.zip";
-
             HttpClient client = new() {
                 Timeout = TimeSpan.FromSeconds(120)
             };
+
             try {
                 if (this.launcherData == null || this.launcherData.versions.Count < 1) {
                     throw new ApplicationException("URL is not defined");
                 }
+                //string url = "https://storage.yandexcloud.net/serious-trouble-resources/Debugging%20archive.zip";
                 string url = this.launcherData.versions[0].buildPath;
-                byte[] bytes = await client.GetByteArrayAsync(new Uri(url));
-                await File.WriteAllBytesAsync(path, bytes);
+                Progress<float> progress = new();
+                progress.ProgressChanged += ProgressChangedEventHandler;
+
+                using FileStream file = new(path, FileMode.Create, FileAccess.Write, FileShare.None);
+                await client.DownloadDataAsync(url, file, progress);
             } catch (Exception e) {
                 ErrorLabel.Text = string.Format("Download archive exception: '{0}'", e.Message);
             } finally {
@@ -171,29 +180,8 @@ namespace SeriousLauncher {
             }
         }
 
-        private async Task DownloadArchive(string path) {
-            var client = new HttpClient();
-
-
-
-            if (this.launcherData == null || this.launcherData.versions.Count < 1) {
-                throw new ApplicationException("URL is not defined");
-            }
-            string url = this.launcherData.versions[0].buildPath;
-
-
-
-            // Customize our progress report
-            Progress<float> progress = new();
-            progress.ProgressChanged += ProgressChangedEventHandler;
-
-            using (FileStream file = new(path, FileMode.Create, FileAccess.Write, FileShare.None)) {
-                await client.DownloadDataAsync(url, file, progress);
-            }
-        }
-
         private void ProgressChangedEventHandler(object? sender, float progress) {
-            StatusStripLabel.Text = string.Format("Progress: {0}", progress);
+            StatusLabel.Text = string.Format("Progress: {0}", progress);
         }
 
         private void DownloadFileCompletedEventHandler(object? sender, AsyncCompletedEventArgs e) {

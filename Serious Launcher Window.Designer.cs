@@ -23,11 +23,12 @@
         ///  the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SeriousLauncherWindow));
             InstallButton = new Button();
             SetupProgressBar = new ProgressBar();
             pictureBox1 = new PictureBox();
             StatusStrip = new StatusStrip();
-            StatusStripLabel = new ToolStripStatusLabel();
+            StatusLabel = new ToolStripStatusLabel();
             RunButton = new Button();
             FolderBrowserDialog = new FolderBrowserDialog();
             ErrorLabel = new Label();
@@ -35,11 +36,11 @@
             StatusStrip.SuspendLayout();
             SuspendLayout();
             // 
-            // SetupButton
+            // InstallButton
             // 
             InstallButton.Enabled = false;
             InstallButton.Location = new Point(825, 597);
-            InstallButton.Name = "SetupButton";
+            InstallButton.Name = "InstallButton";
             InstallButton.Size = new Size(160, 29);
             InstallButton.TabIndex = 0;
             InstallButton.Text = "INSTALL";
@@ -71,7 +72,7 @@
             StatusStrip.BackColor = SystemColors.GradientInactiveCaption;
             StatusStrip.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point);
             StatusStrip.ImageScalingSize = new Size(20, 20);
-            StatusStrip.Items.AddRange(new ToolStripItem[] { StatusStripLabel });
+            StatusStrip.Items.AddRange(new ToolStripItem[] { StatusLabel });
             StatusStrip.Location = new Point(0, 641);
             StatusStrip.MinimumSize = new Size(0, 32);
             StatusStrip.Name = "StatusStrip";
@@ -79,14 +80,14 @@
             StatusStrip.TabIndex = 4;
             StatusStrip.Text = "statusStrip1";
             // 
-            // StatusStripLabel
+            // StatusLabel
             // 
-            StatusStripLabel.BackColor = SystemColors.GradientInactiveCaption;
-            StatusStripLabel.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            StatusStripLabel.Margin = new Padding(0);
-            StatusStripLabel.Name = "StatusStripLabel";
-            StatusStripLabel.Size = new Size(65, 32);
-            StatusStripLabel.Text = "Status";
+            StatusLabel.BackColor = SystemColors.GradientInactiveCaption;
+            StatusLabel.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            StatusLabel.Margin = new Padding(0);
+            StatusLabel.Name = "StatusLabel";
+            StatusLabel.Size = new Size(65, 32);
+            StatusLabel.Text = "Status";
             // 
             // RunButton
             // 
@@ -129,6 +130,7 @@
             Controls.Add(SetupProgressBar);
             Controls.Add(InstallButton);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "SeriousLauncherWindow";
             Text = "Serious Trouble Launcher";
             Shown += SeriousLauncherWindow_Shown;
@@ -145,7 +147,7 @@
         private ProgressBar SetupProgressBar;
         private PictureBox pictureBox1;
         private StatusStrip StatusStrip;
-        private ToolStripStatusLabel StatusStripLabel;
+        private ToolStripStatusLabel StatusLabel;
         private Button RunButton;
         private FolderBrowserDialog FolderBrowserDialog;
         private Label ErrorLabel;
