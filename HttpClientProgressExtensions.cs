@@ -1,4 +1,7 @@
-﻿namespace HttpClientProgress {
+﻿// Add Progress reporting capabilities to HttpClient
+// https://gist.github.com/dalexsoto/9fd3c5bdbe9f61a717d47c5843384d11
+
+namespace HttpClientProgress {
     public static class HttpClientProgressExtensions {
         public static async Task DownloadDataAsync(
             this HttpClient client,
