@@ -33,16 +33,21 @@ namespace HttpClientProgress {
             IProgress<long> progress = null,
             CancellationToken cancellationToken = default
         ) {
-            if (bufferSize < 0)
+            if (bufferSize < 0) {
                 throw new ArgumentOutOfRangeException(nameof(bufferSize));
-            if (source is null)
+            }
+            if (source is null) {
                 throw new ArgumentNullException(nameof(source));
-            if (!source.CanRead)
+            }
+            if (!source.CanRead) {
                 throw new InvalidOperationException($"'{nameof(source)}' is not readable.");
-            if (destination == null)
+            }
+            if (destination == null) {
                 throw new ArgumentNullException(nameof(destination));
-            if (!destination.CanWrite)
+            }
+            if (!destination.CanWrite) {
                 throw new InvalidOperationException($"'{nameof(destination)}' is not writable.");
+            }
 
             var buffer = new byte[bufferSize];
             long totalBytesRead = 0;
