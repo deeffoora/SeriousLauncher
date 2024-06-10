@@ -1,11 +1,9 @@
 using Microsoft.Win32;
 using Newtonsoft.Json;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
 using HttpClientProgress;
-using System;
 
 namespace SeriousLauncher {
     public partial class SeriousLauncherWindow : Form {
@@ -165,6 +163,7 @@ namespace SeriousLauncher {
                     this.pathToApplication, archive.Entries.Count.ToString());
             }
             File.Delete(pathToArchive);
+            Shortcut.CreateDesktopShortcut(Path.Combine(this.pathToApplication, this.applicationFileName));
         }
 
         private async Task DownloadArchiveAsync(string path) {
