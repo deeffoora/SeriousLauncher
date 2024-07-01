@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
 using HttpClientProgress;
+using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace SeriousLauncher {
     public partial class SeriousLauncherWindow : Form {
@@ -163,7 +165,24 @@ namespace SeriousLauncher {
                     this.pathToApplication, archive.Entries.Count.ToString());
             }
             File.Delete(pathToArchive);
+            SetActualVersionToRegistry();
             Shortcut.CreateDesktopShortcut(Path.Combine(this.pathToApplication, this.applicationFileName));
+        }
+
+        private void SetActualVersionToRegistry() {
+            if (this.launcherData == null || this.launcherData.versions.Count == 0) {
+                return;
+            }
+            RegistryKey? subKey = Registry.CurrentUser.OpenSubKey(RegistryData.PathToSubKey, true);
+            if (subKey == null) {
+                return;
+            }
+            string key = GetKeyByTemplateName(subKey, RegistryData.TemplateAppVersionKey);
+            byte[] byteArr = Encoding.UTF8.GetBytes(this.launcherData.versions[0].version);
+            byte[] tail = new byte[byteArr.Length + 1];
+            Array.Copy(byteArr, tail, byteArr.Length);
+            subKey.SetValue(key, tail);
+            subKey?.Close();
         }
 
         private async Task DownloadArchiveAsync(string path) {
